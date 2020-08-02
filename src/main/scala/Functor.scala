@@ -4,6 +4,18 @@ trait Functor[F[_]] {
   def map[A,B](fa : F[A])(f : A => B) : F[B]
 }
 
+object Functor {
+
+  implicit val listFunctor = new Functor[List] {
+    override def map[A, B](fa: List[A])(f: A => B): List[B] = fa.map(f)
+  }
+
+  implicit val optionFunctor = new Functor[Option] {
+    override def map[A, B](fa: Option[A])(f: A => B): Option[B] = fa.map(f)
+  }
+
+}
+
 trait FunctorLaws {
   def identity[F[_],A](fa : F[A])(implicit F : Functor[F]) = {
     F.map(fa)(x => x) == fa
