@@ -6,6 +6,8 @@ trait Functor[F[_]] {
   def lift[A,B](f : A => B) : F[A] => F[B] = map(_)(f)
 
   def as[A,B]( fa : F[A], b : => B) : F[B] = lift((_: A) => b)(fa)
+
+  def void[A](fa : F[A]) : F[Unit] = as(fa, Unit)
 }
 
 object Functor {
