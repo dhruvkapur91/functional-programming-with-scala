@@ -14,6 +14,10 @@ object Functor {
     override def map[A, B](fa: Option[A])(f: A => B): Option[B] = fa.map(f)
   }
 
+  implicit def function1Functor[X] : Functor[X => ?] = new Functor[X => ?] {
+    override def map[A, B](fa: X => A)(f: A => B): X => B = fa andThen f
+  }
+
 }
 
 trait FunctorLaws {
@@ -27,5 +31,8 @@ trait FunctorLaws {
 }
 
 object Main extends App {
-  println("Everything compiles")
+  import Functor._
+
+  val intToInt = (x: Int) => x
+  private val intToString = implicitly[Functor[Int => ?]].map(intToInt)(x => s"x is even : ${x % 2 == 0}")
 }
