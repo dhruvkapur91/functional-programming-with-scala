@@ -8,6 +8,8 @@ import simulacrum._
   def as[A, B](fa: F[A], b: => B): F[B] = lift((_: A) => b)(fa)
 
   def void[A](fa: F[A]): F[Unit] = as(fa, Unit)
+
+  def compose[G[_]](implicit G : Functor[G]) : Functor[Lambda[X => F[G[X]]]] = ???
 }
 
 object Functor {
