@@ -9,7 +9,14 @@ import simulacrum._
 
   def void[A](fa: F[A]): F[Unit] = as(fa, Unit)
 
-  def compose[G[_]](implicit G : Functor[G]) : Functor[Lambda[X => F[G[X]]]] = ???
+  def compose[G[_]](implicit G : Functor[G]) : Functor[Lambda[X => F[G[X]]]] = {
+    val self = this;
+    new Functor[Lambda[X => F[G[X]]]] {
+      override def map[A, B](fa: F[G[A]])(f: A => B): F[G[B]] = {
+        self.map(fa)(G.map(_)(f))
+      }
+    }
+  }
 }
 
 object Functor {
@@ -41,6 +48,31 @@ trait FunctorLaws {
 object Main extends App {
 
   import Functor._
+
+  private val listF: Functor[List] = implicitly[Functor[List]]
+  private val optionF: Functor[Option] = implicitly[Functor[Option]]
+  private val functionF: Functor[Function[Int, ?]] = implicitly[Functor[Int => ?]]
+
+  //  private val value1 = listF.compose(functionF) -- This is not working... it compiled yesterday... not compiling today... not sure what changed...
+
+  //  private val intToStrings: List[Function[Int, String]] = listF.compose(functionF)
+  //    .map(List.empty[Int => String])(x => x.toUpperCase)
+
+  functionF.map(x => List(x))(x => x.map(_.toString))
+
+  private val intToStrings1: Function[Int, List[String]] = functionF.compose(listF)
+    .map(x => List(x))(x => x.toString)
+
+  val data = List(Some(List(1,2,3)))
+
+  listF.compose(optionF).compose(listF)
+    .map(data)(x => x.toString)
+
+  private implicit val value = listF.compose(optionF)
+
+  println {
+    listF.compose(optionF).map(List(Some(1), None, Some(2)))(x => x * 2)
+  }
 
   val intToInt = (x: Int) => x
   private val intToString = implicitly[Functor[Int => ?]].map(intToInt)(x => s"x is even : ${x % 2 == 0}")
